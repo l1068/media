@@ -55,12 +55,10 @@ jobs:
           ln -s "$FFMPEG_PATH" ffmpeg
           ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
           cd "${{ github.workspace }}/media"
-          ./gradlew bundleReleaseAar
+          ./gradlew :lib-decode-ffmpeg:build
       
     - name: Copy Artifacts
       run: |
-          ls -l
-          find .
           mkdir -p libs
           cp media/libraries/decoder_{ffmpeg}/buildout/outputs/aar/*.aar libs/
           cp media/libraries/{common,exoplayer,extractor,ui,session,datasource,decoder,container}/buildout/outputs/aar/*.aar libs/
