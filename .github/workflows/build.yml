@@ -9,11 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      NDK_VER: "26.1.10909125"
-      CMAKE_VER: 3.31.1
-      PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "release-1.8.0-rc02"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
@@ -41,28 +37,22 @@ jobs:
       with:
          ndk-version: r26c
          local-cache: true
-          
-    - name: Build ffmpeg
+
+    - working-directory: media
       run: |
-        # Set environment variables
-        MEDIA3_ROOT="$PWD/$PROJECT_NAME"
-        echo "* Setting up FFMPEG"
-        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
-        export HOST_PLATFORM="linux-x86_64"
-        export ANDROID_ABI=21
-        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
-        pushd $FFMPEG_MODULE_PATH/jni
-        git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
-        rm -rf /usr/local/bin/cmake
-        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
-        popd
-        pushd $PROJECT_NAME
-        
-        ./gradlew bundleReleaseAar
-        
-        popd
-        mkdir -p libs
-        cp $MEDIA3_ROOT/libraries/*/buildout/outputs/aar/*-release.aar libs/
+          FFMPEG_MODULE_PATH="${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main"
+          HOST_PLATFORM="linux-x86_64"
+          ANDROID_ABI=21
+          ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
+          FFMPEG_PATH=${{ github.workspace }}/FFmpeg
+          cd "${FFMPEG_MODULE_PATH}/jni"
+          ln -s "$FFMPEG_PATH" ffmpeg
+          ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS}"
+          cd "${{ github.workspace }}/media"
+          ./gradlew bundleReleaseAar
+
+          mkdir -p libs
+          cp ${{ github.workspace }}/media/libraries/*/buildout/outputs/aar/*-release.aar libs/
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
