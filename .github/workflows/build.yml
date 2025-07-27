@@ -54,15 +54,14 @@ jobs:
 
     - working-directory: media
       run: ./gradlew publishToMavenLocal
-   
-    - name: Copy Artifacts
-      run: |
-          mkdir -p libs
-          cp media/libraries/decoder_{ffmpeg}/buildout/outputs/aar/*.aar libs/
-          cp media/libraries/{common,exoplayer,extractor,ui,session,datasource,decoder,container}/buildout/outputs/aar/*.aar libs/
+
+    - uses: actions/upload-artifact@v4
+      with:
+          name: libraries
+          path: ${{ github.workspace }}/media/libraries/*/buildout/outputs/aar/*-release.aar
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: media3Lib
-        path: libs/*
+        path: libraries/*
