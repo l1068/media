@@ -20,29 +20,68 @@ jobs:
           ref: release
           path: media
 
+    - name: decoder_av1 - cpu_features
+      uses: actions/checkout@v4
+      with:
+           repository: google/cpu_features
+           ref: v0.9.0
+           path: media/libraries/decoder_av1/src/main/jni/cpu_features
+
+    - name: decoder_av1 - libgav1
+      uses: actions/checkout@v4
+      with:
+           repository: moneytoo/libgav1
+           ref: v0.20.0
+           path: media/libraries/decoder_av1/src/main/jni/libgav1
+
+    - name: decoder_av1 - abseil
+      uses: actions/checkout@v4
+      with:
+           repository: abseil/abseil-cpp
+           ref: 20230802.1
+           path: media/libraries/decoder_av1/src/main/jni/libgav1/third_party/abseil-cpp
+
+    - name: decoder_mpegh
+      uses: actions/checkout@v4
+      with:
+           repository: Fraunhofer-IIS/mpeghdec
+           ref: r2.0.1
+           path: media/libraries/decoder_mpegh/src/main/jni/libmpegh
+
+    - name: decoder_iamf
+      uses: actions/checkout@v4
+      with:
+           repository: AOMediaCodec/libiamf
+           ref: v1.1.0
+           path: media/libraries/decoder_iamf/src/main/jni/libiamf
+           sparse-checkout: |
+             *
+             !tests/
+           sparse-checkout-cone-mode: false
+
     - name: decoder_ffmpeg
       uses: actions/checkout@v4
       with:
-          repository: FFmpeg/FFmpeg
-          ref: release/6.0
-          path: media/libraries/decoder_ffmpeg/src/main/jni/ffmpeg
+           repository: FFmpeg/FFmpeg
+           ref: release/6.0
+           path: media/libraries/decoder_ffmpeg/src/main/jni/ffmpeg
           
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - uses: actions/setup-java@v1
       with:
-         java-version: '17.x'
+           java-version: '17.x'
 
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v2
       with:
-         cmake-version: '3.16.x'
+           cmake-version: '3.16.x'
      
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-         ndk-version: r26c
-         local-cache: true
+           ndk-version: r26c
+           local-cache: true
    
     - run: ./build_ffmpeg.sh
           ${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main
@@ -64,4 +103,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: media3Lib
-        path: libraries/*
+        path: libraries
