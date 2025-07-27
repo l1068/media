@@ -31,7 +31,14 @@ jobs:
       with:
           ndk-version: r26c
           local-cache: true
-        
+   
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+          
     - name: Build ffmpeg
       run: |       
         echo "*** Setting up Media3 ***"
@@ -91,7 +98,10 @@ jobs:
         ${{steps.setup-ndk.outputs.ndk-path}}/ndk-build APP_ABI=all -j4
         popd
         pushd $PROJECT_NAME
-        
+
+        echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
+        echo 'org.gradle.caching=true' >> gradle.properties
+        echo 'org.gradle.parallel=true' >> gradle.properties
         ./gradlew bundleReleaseAar
         
         popd
