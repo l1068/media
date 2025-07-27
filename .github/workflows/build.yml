@@ -43,20 +43,17 @@ jobs:
       with:
          ndk-version: r26c
          local-cache: true
+   
+    - run: ./build_ffmpeg.sh
+          ${{ github.workspace }}media/libraries/decoder_ffmpeg/src/main
+          ${{ steps.ndk.outputs.ndk-path }}
+          $(uname -s | tr '[:upper:]' '[:lower:]')-x86_64
+          21
+          vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd
+      working-directory: media/libraries/decoder_ffmpeg/src/main/jni
 
-    - working-directory: media
-      run: |
-          FFMPEG_MODULE_PATH="${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main"
-          HOST_PLATFORM="linux-x86_64"
-          ANDROID_ABI=21
-          ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
-          FFMPEG_PATH=${{ github.workspace }}/FFmpeg
-          cd "${FFMPEG_MODULE_PATH}/jni"
-          ln -s "$FFMPEG_PATH" ffmpeg
-          ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
-          cd "${{ github.workspace }}/media"
-          ./gradlew :lib-decode-ffmpeg:build
-      
+    - run: ./gradlew assembleRelease
+   
     - name: Copy Artifacts
       run: |
           mkdir -p libs
