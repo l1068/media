@@ -9,69 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
+      NDK_VER: "26.1.10909125"
+      CMAKE_VER: 3.31.1
+      PROJECT_USER: "l1068org"
+      PROJECT_NAME: "media"
+      MEDIA3_BRANCH: "release-1.8.0-rc02"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
-
-    - name: Checkout Media3
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
       with:
-          repository: androidx/media
-          ref: release
-          path: media
-
-    - name: decoder_av1 - cpu_features
-      uses: actions/checkout@v4
-      with:
-           repository: google/cpu_features
-           ref: v0.9.0
-           path: media/libraries/decoder_av1/src/main/jni/cpu_features
-
-    - name: decoder_av1 - libgav1
-      uses: actions/checkout@v4
-      with:
-           repository: moneytoo/libgav1
-           ref: v0.20.0
-           path: media/libraries/decoder_av1/src/main/jni/libgav1
-
-    - name: decoder_av1 - abseil
-      uses: actions/checkout@v4
-      with:
-           repository: abseil/abseil-cpp
-           ref: 20230802.1
-           path: media/libraries/decoder_av1/src/main/jni/libgav1/third_party/abseil-cpp
-
-    - name: decoder_mpegh
-      uses: actions/checkout@v4
-      with:
-           repository: Fraunhofer-IIS/mpeghdec
-           ref: r2.0.1
-           path: media/libraries/decoder_mpegh/src/main/jni/libmpegh
-
-    - name: decoder_iamf
-      uses: actions/checkout@v4
-      with:
-           repository: AOMediaCodec/libiamf
-           ref: v1.1.0
-           path: media/libraries/decoder_iamf/src/main/jni/libiamf
-           sparse-checkout: |
-             *
-             !tests/
-           sparse-checkout-cone-mode: false
-
-    - name: decoder_ffmpeg
-      uses: actions/checkout@v4
-      with:
-           repository: FFmpeg/FFmpeg
-           ref: release/6.0
-           path: media/libraries/decoder_ffmpeg/src/main/jni/ffmpeg
-          
-    - uses: seanmiddleditch/gha-setup-ninja@master
-
-    - uses: actions/setup-java@v1
-      with:
-           java-version: '17.x'
-
+          distribution: 'zulu'
+          java-version: 21
+    - uses: gradle/actions/setup-gradle@v4
+     
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v2
       with:
@@ -82,25 +34,76 @@ jobs:
       with:
            ndk-version: r26c
            local-cache: true
-   
-    - run: ./build_ffmpeg.sh
-          ${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main
-          ${{steps.setup-ndk.outputs.ndk-path}}
-          $(uname -s | tr '[:upper:]' '[:lower:]')-x86_64
-          21
-          vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd
-      working-directory: media/libraries/decoder_ffmpeg/src/main/jni
+        
+    - name: Build ffmpeg
+      run: |       
+        echo "*** Setting up Media3 ***"
+        git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
 
-    - working-directory: media
-      run: ./gradlew publishToMavenLocal
+        # Set environment variables
+        MEDIA3_ROOT="$PWD/$PROJECT_NAME"
+        
+        echo "* Setting up FFMPEG"
+        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
+        export HOST_PLATFORM="linux-x86_64"
+        export ANDROID_ABI=21
+        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
+        pushd $FFMPEG_MODULE_PATH/jni
+        git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
+        rm -rf /usr/local/bin/cmake
+        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
+        popd
+        pushd $PROJECT_NAME
+        
+        echo "* Setting up AV1"
+        AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main          
+        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features
+        cd "${AV1_MODULE_PATH}/jni" && git clone https://chromium.googlesource.com/codecs/libgav1
+        cd "${AV1_MODULE_PATH}/jni/libgav1" && git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp -b 20250512.0
+        popd
+        pushd $PROJECT_NAME
 
-    - uses: actions/upload-artifact@v4
-      with:
-          name: libraries
-          path: ${{ github.workspace }}/media/libraries/*/buildout/outputs/aar/*-release.aar
+        echo "* Setting up Flac decoder module"
+        FLAC_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_flac/src/main          
+        cd "${FLAC_MODULE_PATH}/jni" && git clone https://github.com/xiph/flac.git libflac
+        popd
+        pushd $PROJECT_NAME
+        
+        echo "* Setting up IAMF decoder AOMediaCodec module"
+        IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main          
+        cd "${IAMF_MODULE_PATH}/jni" && git clone https://github.com/AOMediaCodec/libiamf.git
+        popd
+        pushd $PROJECT_NAME
+        
+        echo "* Setting up MPEGH decoder module"
+        MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
+        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r2.0.1 libmpegh
+        popd
+        pushd $PROJECT_NAME
+
+        echo "* Setting up Opus decoder module"
+        OPUS_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_opus/src/main          
+        cd "${OPUS_MODULE_PATH}/jni" && git clone https://gitlab.xiph.org/xiph/opus.git libopus
+        popd
+        pushd $PROJECT_NAME
+
+        echo "* Setting up VP9 decoder module"
+        VP9_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_vp9/src/main          
+        cd "${VP9_MODULE_PATH}/jni" && git clone --depth=1 -b v1.8.0 https://chromium.googlesource.com/webm/libvpx libvpx
+        chmod +x ./generate_libvpx_android_configs.sh
+        ./generate_libvpx_android_configs.sh
+        ${{steps.setup-ndk.outputs.ndk-path}}/ndk-build APP_ABI=all -j4
+        popd
+        pushd $PROJECT_NAME
+        
+        ./gradlew bundleReleaseAar
+        
+        popd
+        mkdir -p libs
+        cp $MEDIA3_ROOT/libraries/*/buildout/outputs/aar/*-release.aar libs/
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: media3Lib
-        path: libraries
+        path: libs/*
