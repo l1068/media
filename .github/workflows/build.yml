@@ -17,31 +17,28 @@ jobs:
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - uses: actions/setup-java@v1
       with:
-          distribution: 'zulu'
-          java-version: 21
-    - uses: gradle/actions/setup-gradle@v4
+         java-version: '17.x'
+
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+         cmake-version: '3.16.x'
      
-    - name: Cache NDK
-      uses: actions/cache@v4
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
       with:
-          path: /usr/local/lib/android/sdk/ndk/${{ env.NDK_VER }}
-          key: ${{ runner.os }}-${{ env.NDK_VER }}
-          
-    - name: Install correct NDK and CMake
-      run: sudo ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VER}" "cmake;${CMAKE_VER}"
+         ndk-version: r26c
+         local-cache: true
         
     - name: Build ffmpeg
       run: |       
         echo "*** Setting up Media3 ***"
         git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
 
-        # Ensure NDK is available
-        export NDK_PATH=$ANDROID_HOME/ndk/${NDK_VER}
-        [[ ! -d "$NDK_PATH" ]] && echo "No NDK found at $NDK_PATH, quitting…" && exit 1
-        
         # Set environment variables
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
         echo "* Setting up FFMPEG"
@@ -52,7 +49,7 @@ jobs:
         pushd $FFMPEG_MODULE_PATH/jni
         git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
         rm -rf /usr/local/bin/cmake
-        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
+        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
         pushd $PROJECT_NAME
         
@@ -93,7 +90,7 @@ jobs:
         cd "${VP9_MODULE_PATH}/jni" && git clone --depth=1 -b v1.8.0 https://chromium.googlesource.com/webm/libvpx libvpx
         chmod +x ./generate_libvpx_android_configs.sh
         ./generate_libvpx_android_configs.sh
-        ${NDK_PATH}/ndk-build APP_ABI=all -j4
+        "${{steps.setup-ndk.outputs.ndk-path}}"/ndk-build APP_ABI=all -j4
         popd
         pushd $PROJECT_NAME
         
