@@ -25,12 +25,12 @@ jobs:
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v2
       with:
-           cmake-version: '3.31.1'
+           cmake-version: '4.0.2'
      
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-           ndk-version: r28b
+           ndk-version: r26c
            local-cache: true
         
     - name: Build ffmpeg
