@@ -84,7 +84,7 @@ jobs:
         pushd $PROJECT_NAME
         
         echo "* Setting up FFMPEG"
-        FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
+        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
         cd "${FFMPEG_MODULE_PATH}/jni" && git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
         export HOST_PLATFORM="linux-x86_64"
         export ANDROID_ABI=21
