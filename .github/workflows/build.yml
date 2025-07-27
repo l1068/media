@@ -31,8 +31,9 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-           ndk-version: r26c
-           local-cache: true
+          ndk-version: r28c
+          local-cache: false
+          add-to-path: true
         
     - name: Build ffmpeg
       run: |       
