@@ -45,8 +45,8 @@ jobs:
          local-cache: true
    
     - run: ./build_ffmpeg.sh
-          ${{ github.workspace }}media/libraries/decoder_ffmpeg/src/main
-          ${{ steps.ndk.outputs.ndk-path }}
+          ${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main
+          ${{steps.setup-ndk.outputs.ndk-path}}
           $(uname -s | tr '[:upper:]' '[:lower:]')-x86_64
           21
           vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd
