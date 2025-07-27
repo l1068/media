@@ -43,56 +43,16 @@ jobs:
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
         
         echo "* Setting up FFMPEG"
-        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
-        export HOST_PLATFORM="linux-x86_64"
-        export ANDROID_ABI=21
-        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
+        FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
+        HOST_PLATFORM="linux-x86_64"
+        ANDROID_ABI=21
+        ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
         pushd $FFMPEG_MODULE_PATH/jni
         git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
         pushd $PROJECT_NAME
         
-        echo "* Setting up AV1"
-        AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main          
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://chromium.googlesource.com/codecs/libgav1
-        cd "${AV1_MODULE_PATH}/jni/libgav1" && git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp -b 20250512.0
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up Flac decoder module"
-        FLAC_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_flac/src/main          
-        cd "${FLAC_MODULE_PATH}/jni" && git clone https://github.com/xiph/flac.git libflac
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up IAMF decoder AOMediaCodec module"
-        IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main          
-        cd "${IAMF_MODULE_PATH}/jni" && git clone https://github.com/AOMediaCodec/libiamf.git
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up MPEGH decoder module"
-        MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
-        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r2.0.1 libmpegh
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up Opus decoder module"
-        OPUS_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_opus/src/main          
-        cd "${OPUS_MODULE_PATH}/jni" && git clone https://gitlab.xiph.org/xiph/opus.git libopus
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up VP9 decoder module"
-        VP9_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_vp9/src/main          
-        cd "${VP9_MODULE_PATH}/jni" && git clone --depth=1 -b v1.8.0 https://chromium.googlesource.com/webm/libvpx libvpx
-        chmod +x ./generate_libvpx_android_configs.sh
-        ./generate_libvpx_android_configs.sh
-        ${{steps.setup-ndk.outputs.ndk-path}}/ndk-build APP_ABI=all -j4
-        popd
-        pushd $PROJECT_NAME
         
         ./gradlew bundleReleaseAar
         
