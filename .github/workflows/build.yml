@@ -20,19 +20,26 @@ jobs:
       with:
           distribution: 'zulu'
           java-version: 21
+          
     - uses: gradle/actions/setup-gradle@v4
      
     - name: Setup cmake
       uses: jwlawson/actions-setup-cmake@v2
       with:
            cmake-version: '4.0.2'
+
+    - name: Setup Ninja
+      run: sudo apt-get install ninja-build
+
+    - name: Ninja Version
+      run: ninja --version
      
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-           ndk-version: r26c
+           ndk-version: r28c
            local-cache: true
-        
+   
     - name: Build ffmpeg
       run: |       
         echo "*** Setting up Media3 ***"
