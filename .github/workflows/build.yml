@@ -20,6 +20,13 @@ jobs:
           repository: androidx/media
           ref: release
           path: media
+
+    - name: decoder_ffmpeg
+      uses: actions/checkout@v4
+      with:
+          repository: FFmpeg/FFmpeg
+          ref: release/6.0
+          path: media/libraries/decoder_ffmpeg/src/main/jni/ffmpeg
           
     - uses: seanmiddleditch/gha-setup-ninja@master
 
