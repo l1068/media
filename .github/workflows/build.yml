@@ -84,13 +84,11 @@ jobs:
         pushd $PROJECT_NAME
         
         echo "* Setting up FFMPEG"
-        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
+        FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
+        cd "${FFMPEG_MODULE_PATH}/jni" && git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
         export HOST_PLATFORM="linux-x86_64"
         export ANDROID_ABI=21
         export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
-        pushd $FFMPEG_MODULE_PATH/jni
-        git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
-        rm -rf /usr/local/bin/cmake
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
         pushd $PROJECT_NAME
