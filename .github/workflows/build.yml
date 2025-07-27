@@ -17,6 +17,14 @@ jobs:
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
+
+    - name: Checkout Media3
+      uses: actions/checkout@v4
+      with:
+          repository: androidx/media
+          ref: release
+          path: media
+          
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - uses: actions/setup-java@v1
@@ -33,12 +41,9 @@ jobs:
       with:
          ndk-version: r26c
          local-cache: true
-        
+          
     - name: Build ffmpeg
-      run: |       
-        echo "*** Setting up Media3 ***"
-        git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
-
+      run: |
         # Set environment variables
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
         echo "* Setting up FFMPEG"
@@ -53,106 +58,14 @@ jobs:
         popd
         pushd $PROJECT_NAME
         
-        echo "* Setting up AV1"
-        AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main          
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://chromium.googlesource.com/codecs/libgav1
-        cd "${AV1_MODULE_PATH}/jni/libgav1" && git clone https://github.com/abseil/abseil-cpp.git third_party/abseil-cpp -b 20250512.0
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up Flac decoder module"
-        FLAC_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_flac/src/main          
-        cd "${FLAC_MODULE_PATH}/jni" && git clone https://github.com/xiph/flac.git libflac
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up IAMF decoder AOMediaCodec module"
-        IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main          
-        cd "${IAMF_MODULE_PATH}/jni" && git clone https://github.com/AOMediaCodec/libiamf.git
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up MPEGH decoder module"
-        MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
-        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r2.0.1 libmpegh
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up Opus decoder module"
-        OPUS_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_opus/src/main          
-        cd "${OPUS_MODULE_PATH}/jni" && git clone https://gitlab.xiph.org/xiph/opus.git libopus
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up VP9 decoder module"
-        VP9_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_vp9/src/main          
-        cd "${VP9_MODULE_PATH}/jni" && git clone --depth=1 -b v1.8.0 https://chromium.googlesource.com/webm/libvpx libvpx
-        chmod +x ./generate_libvpx_android_configs.sh
-        ./generate_libvpx_android_configs.sh
-        "${{steps.setup-ndk.outputs.ndk-path}}"/ndk-build APP_ABI=all -j4
-        popd
-        pushd $PROJECT_NAME
-        
         ./gradlew bundleReleaseAar
-        #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
-        #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
-        #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
         
         popd
         mkdir -p libs
         cp $MEDIA3_ROOT/libraries/*/buildout/outputs/aar/*-release.aar libs/
-        #cp $MEDIA3_ROOT/libraries/decoder_{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}/buildout/outputs/aar/*.aar libs/
-        #cp $MEDIA3_ROOT/libraries/{common,exoplayer,extractor,ui,session,datasource,decoder,container}/buildout/outputs/aar/*.aar libs/
-        #cp $MEDIA3_ROOT/libraries/{exoplayer_dash,exoplayer_hls,exoplayer_smoothstreaming,exoplayer_rtsp}/buildout/outputs/aar/*.aar libs/
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: media3Lib
         path: libs/*
-        
-    - name: Clone target repository
-      env:
-         GIT_TOKEN: ${{ secrets.REPO_TOKEN }}
-         REPO_USER: ${{ secrets.REPO_NAME }}
-      run: |
-        git clone https://${GIT_TOKEN}@github.com/${REPO_USER}/media.git  media3Libs
-        cd media3Libs
-        git checkout -b CI || git checkout CI
-
-    - name: Copy libs folder to target repository
-      run: |
-        mkdir -p media3Libs/libs
-        cp -r libs/* media3Libs/libs
-        cd media3Libs
-        git add .
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git commit -m "Update libs folder with latest build artifacts"
-
-        echo 'jdk:
-           - openjdk17
-        install:
-           - |
-             cd libs
-             for lib in *; do
-             libName=${lib//.aar/}
-      
-             mvn install:install-file \
-               -Dfile=$lib \
-               -DgroupId=com.l1068.media \
-               -DartifactId=$libName \
-               -Dversion=$VERSION \
-               -Dpackaging=aar \
-               -DgeneratePom=true
-              done' > jitpack.yml
-         git add jitpack.yml
-         git commit -m "Update jitpack.yml"
-         git push origin CI --force
-
-    - name: Push changes to CI branch
-      run: |
-        cd media3Libs
-        git push -f origin CI
-        
