@@ -11,9 +11,9 @@ jobs:
     env:
       NDK_VER: "26.1.10909125"
       CMAKE_VER: 3.31.1
-      PROJECT_USER: "shenwill"
+      PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "dev-private"
+      MEDIA3_BRANCH: "release-1.8.0-rc02"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
