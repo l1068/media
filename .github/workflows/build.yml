@@ -9,7 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      PROJECT_NAME: "media"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
@@ -60,8 +59,11 @@ jobs:
       
     - name: Copy Artifacts
       run: |
+          ls -l
+          find .
           mkdir -p libs
-          cp /media/libraries/*/buildout/outputs/aar/*-release.aar libs/
+          cp media/libraries/decoder_{ffmpeg}/buildout/outputs/aar/*.aar libs/
+          cp media/libraries/{common,exoplayer,extractor,ui,session,datasource,decoder,container}/buildout/outputs/aar/*.aar libs/
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
