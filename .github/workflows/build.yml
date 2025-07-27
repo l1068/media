@@ -52,7 +52,7 @@ jobs:
           vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd
       working-directory: media/libraries/decoder_ffmpeg/src/main/jni
 
-    - run: ./gradlew assembleRelease
+    - run: ./gradlew publishToMavenLocal
    
     - name: Copy Artifacts
       run: |
