@@ -28,16 +28,10 @@ jobs:
       with:
            cmake-version: '4.0.2'
 
-    - name: Setup Ninja
-      run: sudo apt-get install ninja-build
-
-    - name: Ninja Version
-      run: ninja --version
-     
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-           ndk-version: r28c
+           ndk-version: r26c
            local-cache: true
    
     - name: Build ffmpeg
@@ -47,20 +41,8 @@ jobs:
 
         # Set environment variables
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
-        
-        echo "* Setting up FFMPEG"
-        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
-        export HOST_PLATFORM="linux-x86_64"
-        export ANDROID_ABI=21
-        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
-        pushd $FFMPEG_MODULE_PATH/jni
-        git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
-        rm -rf /usr/local/bin/cmake
-        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up AV1"
+
+         echo "* Setting up AV1"
         AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main          
         cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features
         cd "${AV1_MODULE_PATH}/jni" && git clone https://chromium.googlesource.com/codecs/libgav1
@@ -98,6 +80,18 @@ jobs:
         chmod +x ./generate_libvpx_android_configs.sh
         ./generate_libvpx_android_configs.sh
         ${{steps.setup-ndk.outputs.ndk-path}}/ndk-build APP_ABI=all -j4
+        popd
+        pushd $PROJECT_NAME
+        
+        echo "* Setting up FFMPEG"
+        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
+        export HOST_PLATFORM="linux-x86_64"
+        export ANDROID_ABI=21
+        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
+        pushd $FFMPEG_MODULE_PATH/jni
+        git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
+        rm -rf /usr/local/bin/cmake
+        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${{steps.setup-ndk.outputs.ndk-path}}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
         pushd $PROJECT_NAME
         
