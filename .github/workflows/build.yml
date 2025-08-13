@@ -9,9 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      PROJECT_USER: "l1068org"
+      PROJECT_USER: "Coder-HuangBH"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "release-1.8.0-rc02"
+      MEDIA3_BRANCH: "exo_ui"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
