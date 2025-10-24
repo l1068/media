@@ -12,7 +12,7 @@ jobs:
       CMAKE_VER: 3.31.1
       PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "1.9.0-alpha01-1"
+      MEDIA3_BRANCH: "1.9.0-alpha01-2"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
