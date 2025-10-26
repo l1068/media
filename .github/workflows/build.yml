@@ -63,47 +63,6 @@ jobs:
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
         pushd $PROJECT_NAME
-        
-        echo "* Setting up AV1"
-        AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features -b v0.10.1
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://code.videolan.org/videolan/dav1d.git
-        ./build_dav1d.sh "${AV1_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}"
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up Flac decoder module"
-        FLAC_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_flac/src/main          
-        cd "${FLAC_MODULE_PATH}/jni" && git clone https://github.com/xiph/flac.git libflac
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up IAMF decoder AOMediaCodec module"
-        IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main          
-        cd "${IAMF_MODULE_PATH}/jni" && git clone https://github.com/l1068/libiamf.git
-        popd
-        pushd $PROJECT_NAME
-        
-        echo "* Setting up MPEGH decoder module"
-        MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
-        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r3.0.1 libmpegh
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up Opus decoder module"
-        OPUS_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_opus/src/main          
-        cd "${OPUS_MODULE_PATH}/jni" && git clone https://github.com/xiph/opus.git libopus
-        popd
-        pushd $PROJECT_NAME
-
-        echo "* Setting up VP9 decoder module"
-        VP9_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_vp9/src/main          
-        cd "${VP9_MODULE_PATH}/jni" && git clone --depth=1 -b v1.15.2 https://chromium.googlesource.com/webm/libvpx libvpx
-        chmod +x ./generate_libvpx_android_configs.sh
-        ./generate_libvpx_android_configs.sh
-        ${NDK_PATH}/ndk-build APP_ABI="armeabi-v7a arm64-v8a x86 x86_64" -j4
-        popd
-        pushd $PROJECT_NAME
 
         echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
         echo 'org.gradle.caching=true' >> gradle.properties
