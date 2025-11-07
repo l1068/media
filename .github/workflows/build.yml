@@ -48,6 +48,12 @@ jobs:
       run: |       
         echo "*** Setting up Media3 ***"
         git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
+
+        echo "Using NDK path: ${{ steps.setup-ndk.outputs.ndk-path }}"
+          ls -1 ${{ steps.setup-ndk.outputs.ndk-path }}
+             ${{
+                  steps.setup-ndk.outputs.ndk-path
+            }}/source.properties | grep Pkg.Revision || true
         
         # Set environment variables
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
@@ -104,17 +110,20 @@ jobs:
         popd
         pushd $PROJECT_NAME
 
-    - name: Build Media3 AARs
-      run: |
-          cd media
-          echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
-          echo 'org.gradle.caching=true' >> gradle.properties
-          echo 'org.gradle.parallel=true' >> gradle.properties
-          ./gradlew --no-daemon --stacktrace bundleReleaseAar
-          
-          #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
-          #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
-          #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
+        echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
+        echo 'org.gradle.caching=true' >> gradle.properties
+        echo 'org.gradle.parallel=true' >> gradle.properties
+        ./gradlew --no-daemon --stacktrace bundleReleaseAar
+        
+        #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
+        #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
+        #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
+
+        echo "Using NDK path: ${{ steps.setup-ndk.outputs.ndk-path }}"
+         ls -1 ${{ steps.setup-ndk.outputs.ndk-path }}
+             ${{
+                  steps.setup-ndk.outputs.ndk-path
+            }}/source.properties | grep Pkg.Revision || true
 
     - name: Collect AARs
       run: |
