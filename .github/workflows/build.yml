@@ -28,12 +28,15 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
      
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-          ndk-version: r29
-          local-cache: false
-          add-to-path: true
+    - name: Install NDK r29
+      id: install-ndk
+      run: |
+        # Accept licenses (automated 'yes')
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+        # Install exact NDK version
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk;29.0.14206865"
+        # Export path for later steps
+        echo "NDK_PATH=$ANDROID_SDK_ROOT/ndk/29.0.14206865" >> $GITHUB_ENV
 
     - uses: ilammy/setup-nasm@v1
     - name: Install Meson
@@ -49,12 +52,6 @@ jobs:
         echo "*** Setting up Media3 ***"
         git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
 
-        echo "Using NDK path: ${{ steps.setup-ndk.outputs.ndk-path }}"
-          ls -1 ${{ steps.setup-ndk.outputs.ndk-path }}
-             ${{
-                  steps.setup-ndk.outputs.ndk-path
-            }}/source.properties | grep Pkg.Revision || true
-        
         # Set environment variables
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
         echo "*** Setting up FFMPEG ***"
@@ -118,12 +115,6 @@ jobs:
         #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
         #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
         #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
-
-        echo "Using NDK path: ${{ steps.setup-ndk.outputs.ndk-path }}"
-         ls -1 ${{ steps.setup-ndk.outputs.ndk-path }}
-             ${{
-                  steps.setup-ndk.outputs.ndk-path
-            }}/source.properties | grep Pkg.Revision || true
 
     - name: Collect AARs
       run: |
