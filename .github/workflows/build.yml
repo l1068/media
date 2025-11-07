@@ -45,9 +45,9 @@ jobs:
     - name: Build ffmpeg
       continue-on-error: false
       env:
-          ANDROID_NDK_HOME: ${{steps.setup-ndk.outputs.ndk-path }}
-          NDK_PATH: ${{ steps.setup-ndk.outputs.ndk-path }}
-          ROOT_DIR:  ${{ github.workspace }}
+          ANDROID_NDK_HOME: ${{ env.NDK_PATH }} 
+          NDK_PATH: ${{ env.NDK_PATH }}
+          ROOT_DIR: ${{ github.workspace }}
       run: |       
         echo "*** Setting up Media3 ***"
         git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
