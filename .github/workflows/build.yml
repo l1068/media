@@ -9,7 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      CMAKE_VER: 3.31.1
       PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
       MEDIA3_BRANCH: "1.9.0-alpha01-2"
@@ -105,21 +104,25 @@ jobs:
         popd
         pushd $PROJECT_NAME
 
-        echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
-        echo 'org.gradle.caching=true' >> gradle.properties
-        echo 'org.gradle.parallel=true' >> gradle.properties
-        
-        ./gradlew bundleReleaseAar
-        #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
-        #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
-        #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
-        
-        popd
-        mkdir -p libs
-        cp $MEDIA3_ROOT/libraries/*/buildout/outputs/aar/*-release.aar libs/
-        #cp $MEDIA3_ROOT/libraries/decoder_{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}/buildout/outputs/aar/*.aar libs/
-        #cp $MEDIA3_ROOT/libraries/{common,exoplayer,extractor,ui,session,datasource,decoder,container}/buildout/outputs/aar/*.aar libs/
-        #cp $MEDIA3_ROOT/libraries/{exoplayer_dash,exoplayer_hls,exoplayer_smoothstreaming,exoplayer_rtsp}/buildout/outputs/aar/*.aar libs/
+    - name: Build Media3 AARs
+      run: |
+          cd media
+          echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
+          echo 'org.gradle.caching=true' >> gradle.properties
+          echo 'org.gradle.parallel=true' >> gradle.properties
+          ./gradlew --no-daemon --stacktrace bundleReleaseAar
+          
+          #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
+          #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
+          #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
+
+    - name: Collect AARs
+      run: |
+          mkdir -p libs
+          cp media/libraries/*/buildout/outputs/aar/*-release.aar libs/
+          #cp $MEDIA3_ROOT/libraries/decoder_{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}/buildout/outputs/aar/*.aar libs/
+          #cp $MEDIA3_ROOT/libraries/{common,exoplayer,extractor,ui,session,datasource,decoder,container}/buildout/outputs/aar/*.aar libs/
+          #cp $MEDIA3_ROOT/libraries/{exoplayer_dash,exoplayer_hls,exoplayer_smoothstreaming,exoplayer_rtsp}/buildout/outputs/aar/*.aar libs/
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
