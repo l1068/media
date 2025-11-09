@@ -79,7 +79,7 @@ jobs:
         
         echo "* Setting up IAMF decoder AOMediaCodec module"
         IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main          
-        cd "${IAMF_MODULE_PATH}/jni" && git clone https://github.com/moneytoo/libiamf.git -b v1.1.0a
+        cd "${IAMF_MODULE_PATH}/jni" && git clone https://github.com/AOMediaCodec/libiamf.git
         popd
         pushd $PROJECT_NAME
         
