@@ -107,6 +107,8 @@ jobs:
     - name: Build Media3 AARs
       run: |
           cd media
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;29.0.14206865"
           echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
           echo 'org.gradle.caching=true' >> gradle.properties
           echo 'org.gradle.parallel=true' >> gradle.properties
@@ -115,8 +117,6 @@ jobs:
           #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
           #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
           #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
-      env:
-            ANDROID_NDK_HOME: ${{steps.setup-ndk.outputs.ndk-path }}
 
     - name: Collect AARs
       run: |
