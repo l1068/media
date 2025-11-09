@@ -33,7 +33,7 @@ jobs:
       with:
           ndk-version: r29
           local-cache: false
-          add-to-path: true
+          add-to-path: false
 
     - uses: ilammy/setup-nasm@v1
     - name: Install Meson
