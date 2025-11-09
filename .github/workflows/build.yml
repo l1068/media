@@ -33,7 +33,7 @@ jobs:
       with:
           ndk-version: r29
           local-cache: false
-          add-to-path: false
+          add-to-path: true
 
     - uses: ilammy/setup-nasm@v1
     - name: Install Meson
@@ -44,7 +44,7 @@ jobs:
       env:
           ANDROID_NDK_HOME: ${{steps.setup-ndk.outputs.ndk-path }}
           NDK_PATH: ${{ steps.setup-ndk.outputs.ndk-path }}
-          ROOT_DIR:  ${{ github.workspace }}
+          ROOT_DIR: ${{ github.workspace }}
       run: |       
         echo "*** Setting up Media3 ***"
         git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
@@ -107,8 +107,6 @@ jobs:
     - name: Build Media3 AARs
       run: |
           cd media
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;29.0.14206865"
           echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
           echo 'org.gradle.caching=true' >> gradle.properties
           echo 'org.gradle.parallel=true' >> gradle.properties
