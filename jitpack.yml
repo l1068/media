@@ -1,0 +1,16 @@
+jdk:
+   - openjdk17
+install:
+   - |
+     cd libs
+     for lib in *; do
+     libName=${lib//.aar/}
+
+     mvn install:install-file \
+       -Dfile=$lib \
+       -DgroupId=com.l1068.media \
+       -DartifactId=$libName \
+       -Dversion=$VERSION \
+       -Dpackaging=aar \
+       -DgeneratePom=true
+      done
