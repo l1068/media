@@ -85,7 +85,7 @@ jobs:
         
         echo "* Setting up MPEGH decoder module"
         MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
-        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r3.0.1 libmpegh
+        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r3.0.3 libmpegh
         popd
         pushd $PROJECT_NAME
 
@@ -171,4 +171,3 @@ jobs:
       run: |
         cd media3Libs
         git push -f origin CI
-
