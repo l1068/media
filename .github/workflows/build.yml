@@ -71,7 +71,7 @@ jobs:
         
         echo "* Setting up AV1"
         AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features -b v0.10.1
+        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features -b v0.11.0
         cd "${AV1_MODULE_PATH}/jni" && git clone https://code.videolan.org/videolan/dav1d.git
         ./build_dav1d.sh "${AV1_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}"
         popd
@@ -110,7 +110,6 @@ jobs:
         ./build_iamf_tools.sh ${IAMF_MODULE_PATH}
         popd
         pushd $PROJECT_NAME
-
        
 
     - name: Build Media3 AARs
