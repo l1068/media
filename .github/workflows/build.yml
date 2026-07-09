@@ -94,7 +94,7 @@ jobs:
         cd "${VP9_MODULE_PATH}/jni" && git clone --depth=1 -b v1.15.2 https://chromium.googlesource.com/webm/libvpx libvpx
         chmod +x ./generate_libvpx_android_configs.sh
         ./generate_libvpx_android_configs.sh
-        ${NDK_PATH}/ndk-build APP_ABI=all -j4
+        ${NDK_PATH}/ndk-build -j4
         popd
         pushd $PROJECT_NAME
 
