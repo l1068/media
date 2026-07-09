@@ -77,16 +77,6 @@ jobs:
         popd
         pushd $PROJECT_NAME
         
-        echo "* Setting up IAMF decoder AOMediaCodec module"
-        IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main
-        pushd "${IAMF_MODULE_PATH}/jni"
-        git clone https://github.com/AOMediaCodec/iamf-tools.git iamf_tools
-        cd iamf_tools
-        git reset --hard de364b983
-        ./build_iamf_tools.sh "${IAMF_MODULE_PATH}"
-        popd
-        pushd "$PROJECT_NAME"
-        
         echo "* Setting up MPEGH decoder module"
         MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
         cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r3.0.3 libmpegh
