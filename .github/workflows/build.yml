@@ -9,9 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      PROJECT_USER: "FongMi"
+      PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "release-1.11.0-fongmi"
+      MEDIA3_BRANCH: "1.11.0-fongmi"
       FFMPEG_BRANCH: "release-9.0-fongmi"
     
     steps:
