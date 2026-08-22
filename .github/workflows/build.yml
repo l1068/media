@@ -137,6 +137,8 @@ jobs:
         echo "FFMPEG_MODULE_PATH is ${FFMPEG_MODULE_PATH}"
         echo "Enabled decoders: ${ENABLED_DECODERS[*]}"
         echo "Enabled externals: ${ENABLED_EXTERNALS}"
+
+        cd "${FFMPEG_MODULE_PATH}/jni"
         
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
 
