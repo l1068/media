@@ -9,9 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      PROJECT_USER: "WoKee"
+      PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "release"
+      MEDIA3_BRANCH: "1.10.1"
+      FFMPEG_BRANCH: "release/6.0"
     
     steps:
     - uses: actions/checkout@v5
@@ -60,9 +61,9 @@ jobs:
         export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
         export HOST_PLATFORM="linux-x86_64"
         export ANDROID_ABI=21
-        export ENABLED_DECODERS=(vorbis opus flac eac3 libarcdav3a aac mp3 mp1 mp2 als truehd dca alac amrnb amrwb pcm_mulaw pcm_alaw dsd_msbf dsd_lsbf_planar dsd_msbf_planar dst cook sipr ralf atrac3 atrac3plus wmav1 wmav2 wmapro wmalossless wmavoice)
+        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
         pushd $FFMPEG_MODULE_PATH/jni
-        git clone https://github.com/WoKee/FFmpeg --branch=release-9.0-fongmi --depth=1 ffmpeg
+        git clone -b $FFMPEG_BRANCH https://git.ffmpeg.org/ffmpeg.git
         rm -rf /usr/local/bin/cmake
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
