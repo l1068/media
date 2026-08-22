@@ -11,7 +11,7 @@ jobs:
     env:
       PROJECT_USER: "WoKee"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "release"
+      MEDIA3_BRANCH: "release-1.11.0-fongmi"
     
     steps:
     - uses: actions/checkout@v5
