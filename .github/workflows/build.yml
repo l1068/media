@@ -1,6 +1,9 @@
 name: Media3 library Build
 
-on: workflow_dispatch
+on:
+   push:
+     branches: [ "build" ]
+   pull_request:
 
 jobs:
   build:
