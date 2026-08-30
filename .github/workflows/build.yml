@@ -174,7 +174,6 @@ jobs:
          git add jitpack.yml
          git commit -m "Update jitpack.yml"
          git push origin CI --force
-
     - name: Push changes to CI branch
       run: |
         cd media3Libs
