@@ -11,7 +11,7 @@ jobs:
     env:
       PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "1.11.0-fongmi"
+      MEDIA3_BRANCH: "1.11.0-fongmi-1"
       FFMPEG_BRANCH: "release-9.0-fongmi"
     
     steps:
