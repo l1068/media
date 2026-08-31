@@ -11,7 +11,7 @@ jobs:
     env:
       PROJECT_USER: "l1068org"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "r1.11.0-0.0.5"
+      MEDIA3_BRANCH: "r1.11.0-0.0.8"
       FFMPEG_BRANCH: "release/6.0"
     
     steps:
