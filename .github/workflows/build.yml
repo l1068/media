@@ -63,7 +63,7 @@ jobs:
         export ANDROID_ABI=21
         export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
         pushd $FFMPEG_MODULE_PATH/jni
-        git clone -b $FFMPEG_BRANCH https://github.com/FongMi/FFmpeg.git ffmpeg
+        git clone -b $FFMPEG_BRANCH https://github.com/WoKee/FFmpeg.git ffmpeg
         rm -rf /usr/local/bin/cmake
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
@@ -78,63 +78,4 @@ jobs:
           echo 'org.gradle.parallel=true' >> gradle.properties
           ./gradlew bundleReleaseAar
           
-          #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
-          #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
-          #./gradlew :lib-{exoplayer-dash,exoplayer-hls,exoplayer-smoothstreaming,exoplayer-rtsp}:bundleReleaseAar
-
-    - name: Collect AARs
-      run: |
-          mkdir -p libs
-          cp media/libraries/*/buildout/outputs/aar/*-release.aar libs/
-          #cp $MEDIA3_ROOT/libraries/decoder_{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}/buildout/outputs/aar/*.aar libs/
-    
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: media3Lib
-        path: libs/*
-        
-    - name: Clone target repository
-      env:
-         GIT_TOKEN: ${{ secrets.REPO_TOKEN }}
-         REPO_USER: ${{ secrets.REPO_NAME }}
-      run: |
-        git clone https://${GIT_TOKEN}@github.com/${REPO_USER}/media.git  media3Libs
-        cd media3Libs
-        git checkout -b CI || git checkout CI
-
-    - name: Copy libs folder to target repository
-      run: |
-        mkdir -p media3Libs/libs
-        cp -r libs/* media3Libs/libs
-        cd media3Libs
-        git add .
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git commit -m "Update libs folder with latest build artifacts"
-
-        echo 'jdk:
-           - openjdk17
-        install:
-           - |
-             cd libs
-             for lib in *; do
-             libName=${lib//.aar/}
-      
-             mvn install:install-file \
-               -Dfile=$lib \
-               -DgroupId=com.l1068.media \
-               -DartifactId=$libName \
-               -Dversion=$VERSION \
-               -Dpackaging=aar \
-               -DgeneratePom=true
-              done' > jitpack.yml
-         git add jitpack.yml
-         git commit -m "Update jitpack.yml"
-         git push origin CI --force
-
-    - name: Push changes to CI branch
-      run: |
-        cd media3Libs
-        git push -f origin CI
-        
+       
