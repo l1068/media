@@ -77,13 +77,25 @@ jobs:
           echo 'org.gradle.caching=true' >> gradle.properties
           echo 'org.gradle.parallel=true' >> gradle.properties
           ./gradlew bundleReleaseAar --no-daemon --stacktrace 2>&1 | tee gradle-build.log
-          
+
+    - name: Collect AARs
+      run: |
+          mkdir -p libs
+          cp media/libraries/*/buildout/outputs/aar/*-release.aar libs/
+          #cp $MEDIA3_ROOT/libraries/decoder_{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}/buildout/outputs/aar/*.aar libs/
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: media3Lib
+        path: libs/*
+        
     - name: Upload build logs on failure
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-      name: build-logs
-      path: |
+         name: build-logs
+         path: |
             gradle-build.log
             /tmp/build.log
-          retention-days: 7
+         retention-days: 7
