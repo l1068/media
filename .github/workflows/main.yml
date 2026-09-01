@@ -74,6 +74,25 @@ jobs:
       working-directory: media
       run: |
           ./gradlew :lib-decoder-ffmpeg:assembleRelease --no-daemon --stacktrace 2>&1 | tee gradle-build.log
+      
+    # Collect and upload AARs
+    - name: Collect AARs
+      if: always()
+      run: |
+          mkdir -p aar-output
+          find libraries -name "*.aar" -type f -exec cp {} aar-output/ \;
+          echo "=== Collected AARs ==="
+          ls -lh aar-output/
+          echo "=== Total: $(ls aar-output/*.aar 2>/dev/null | wc -l) AARs ==="
+
+    - name: Upload AARs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+          name: media3-aar
+          path: aar-output/
+          retention-days: 30
+          
 
     - name: Upload build logs on failure
       if: failure()
