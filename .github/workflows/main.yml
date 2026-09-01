@@ -45,7 +45,7 @@ jobs:
       
     - name: Check out exact Media3 source
       run: |
-          git clone --depth 1 -b r1.11.0-0.0.8-2 https://github.com/l1068org/media.git media
+          git clone --depth 1 -b release-1.11.0-fongmi https://github.com/WoKee/media.git media
           
     - name: Build ffmpeg
       continue-on-error: false
