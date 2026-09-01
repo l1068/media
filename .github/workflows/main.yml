@@ -61,25 +61,26 @@ jobs:
           echo "---"
           bash -x ${{ github.workspace }}/.github/scripts/build.sh 2>&1 | tee /tmp/build.log; exit ${PIPESTATUS[0]}
 
-    # Upload FFmpeg static libs
+    # Upload FFmpeg static libs (correct path into the checked-out media subtree)
     - name: Upload FFmpeg Static Libs
       continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
           name: "ffmpeg-libs"
-          path: ${{ github.workspace }}/libraries/decoder_ffmpeg/src/main/jni/ffmpeg/android-libs
+          path: ${{ github.workspace }}/media/libraries/decoder_ffmpeg/src/main/jni/ffmpeg/android-libs
 
-    # Build all AARs
+    # Build all AARs (run gradlew inside the media directory)
     - name: Build AARs
-      run: |       
+      working-directory: media
+      run: |
           ./gradlew :lib-decoder-ffmpeg:assembleRelease --no-daemon --stacktrace 2>&1 | tee gradle-build.log
-  
+
     - name: Upload build logs on failure
       if: failure()
       uses: actions/upload-artifact@v4
       with:
           name: build-logs
           path: |
-            gradle-build.log
+            media/gradle-build.log
             /tmp/build.log
           retention-days: 7
