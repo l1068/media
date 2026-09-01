@@ -4,8 +4,8 @@ set -eux
 echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
 echo "NDK_PATH=$NDK_PATH"
 
-FFMPEG_MODULE_PATH="${GITHUB_WORKSPACE}/libraries/decoder_ffmpeg/src/main"
-export MEDIA3_PATH="${GITHUB_WORKSPACE}"
+FFMPEG_MODULE_PATH="${GITHUB_WORKSPACE}/media/libraries/decoder_ffmpeg/src/main"
+export MEDIA3_PATH="${GITHUB_WORKSPACE}/media"
 
 cd "${MEDIA3_PATH}"
 
