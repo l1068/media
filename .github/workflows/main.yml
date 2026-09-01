@@ -71,8 +71,7 @@ jobs:
 
     # Build all AARs
     - name: Build AARs
-      run: |
-          chmod +x gradlew          
+      run: |       
           ./gradlew :lib-decoder-ffmpeg:assembleRelease --no-daemon --stacktrace 2>&1 | tee gradle-build.log
   
     - name: Upload build logs on failure
