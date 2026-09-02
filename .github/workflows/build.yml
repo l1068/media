@@ -1,11 +1,31 @@
-name: Media3 library Build
+name: Media3 library Build demo
 
 on:
-   push:
-     branches: [ "build" ]
-   pull_request:
-   
-   workflow_dispatch:
+  push:
+    branches:
+      - demo
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      ENABLED_DECODERS:
+        description: "ENABLED_DECODERS"
+        required: true
+        default: 'vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd'
+      FFMPEG_ENABLE_GPL:
+        description: "Enable FFmpeg GPL"
+        required: true
+        default: false
+        type: boolean
+      FFMPEG_ENABLE_VERSION_3:
+        description: "Enable FFmpeg (L)GPL version 3"
+        required: true
+        default: false
+        type: boolean
+      FFMEPG_ENABLE_NONFREE:
+        description: "Enable FFmpeg nonfree"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -63,9 +83,20 @@ jobs:
         export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
         export HOST_PLATFORM="linux-x86_64"
         export ANDROID_ABI=21
-        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
+        export ENABLED_DECODERS=(${{ github.event.inputs.ENABLED_DECODERS }})
         pushd $FFMPEG_MODULE_PATH/jni
         git clone -b "$FFMPEG_BRANCH" https://github.com/FongMi/FFmpeg.git ffmpeg
+
+        if [ ${{ github.event.inputs.FFMPEG_ENABLE_GPL }} = true ]; then
+            sed -i '/--disable-vulkan/a\    --enable-gpl' build_ffmpeg.sh
+          fi
+          if [ ${{ github.event.inputs.FFMPEG_ENABLE_VERSION_3 }} = true ]; then
+            sed -i '/--disable-vulkan/a\    --enable-version3' build_ffmpeg.sh
+          fi
+          if [ ${{ github.event.inputs.FFMEPG_ENABLE_NONFREE }} = true ]; then
+            sed -i '/--disable-vulkan/a\    --enable-nonfree' build_ffmpeg.sh
+          fi
+        
         rm -rf /usr/local/bin/cmake
         ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
         popd
