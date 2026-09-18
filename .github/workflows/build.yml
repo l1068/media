@@ -57,17 +57,28 @@ jobs:
         echo "*** Setting up Media3 ***"
         git clone -b $MEDIA3_BRANCH https://github.com/$PROJECT_USER/$PROJECT_NAME.git
         
-        # Set environment variables
         MEDIA3_ROOT="$PWD/$PROJECT_NAME"
+
+        echo "*** Setting up FFMPEG ***"
+        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
         export HOST_PLATFORM="linux-x86_64"
+        export ANDROID_ABI=21
+        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
+        pushd $FFMPEG_MODULE_PATH/jni
+        git clone -b "$FFMPEG_BRANCH" https://github.com/FongMi/FFmpeg.git ffmpeg
+        rm -rf /usr/local/bin/cmake
+        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
+        popd
+        pushd $PROJECT_NAME
         
         echo "* Setting up AV1"
         AV1_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_av1/src/main
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://github.com/google/cpu_features --branch v0.9.0 --depth=1
-        cd "${AV1_MODULE_PATH}/jni" && git clone https://code.videolan.org/videolan/dav1d.git --branch 1.5.4 --depth=1
+        pushd "${AV1_MODULE_PATH}/jni"
+        git clone https://github.com/google/cpu_features --branch v0.9.0 --depth=1
+        git clone https://code.videolan.org/videolan/dav1d.git --branch 1.5.4 --depth=1
         ./build_dav1d.sh "${AV1_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}"
         popd
-        pushd $PROJECT_NAME
+        pushd "$PROJECT_NAME"
 
         echo "* Setting up Flac decoder module"
         FLAC_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_flac/src/main          
@@ -77,19 +88,22 @@ jobs:
         
         echo "* Setting up MPEGH decoder module"
         MPEGH_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_mpegh/src/main        
-        cd "${MPEGH_MODULE_PATH}/jni" && git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r3.0.3 --depth=1 libmpegh
+        pushd "${MPEGH_MODULE_PATH}/jni" 
+        git clone https://github.com/Fraunhofer-IIS/mpeghdec.git --branch r3.0.3 --depth=1 libmpegh
         popd
         pushd $PROJECT_NAME
 
         echo "* Setting up Opus decoder module"
         OPUS_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_opus/src/main          
-        cd "${OPUS_MODULE_PATH}/jni" && git clone https://gitlab.xiph.org/xiph/opus.git --branch v1.6.1 --depth=1 libopus
+        pushd "${OPUS_MODULE_PATH}/jni" 
+        git clone https://gitlab.xiph.org/xiph/opus.git --branch v1.6.1 --depth=1 libopus
         popd
         pushd $PROJECT_NAME
 
         echo "* Setting up VP9 decoder module"
         VP9_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_vp9/src/main          
-        cd "${VP9_MODULE_PATH}/jni" && git clone https://chromium.googlesource.com/webm/libvpx --branch v1.15.2 --depth=1 libvpx
+        pushd "${VP9_MODULE_PATH}/jni" 
+        git clone https://chromium.googlesource.com/webm/libvpx --branch v1.15.2 --depth=1 libvpx
         chmod +x ./generate_libvpx_android_configs.sh
         ./generate_libvpx_android_configs.sh
         ${NDK_PATH}/ndk-build -j4
@@ -98,22 +112,11 @@ jobs:
 
         echo "* Setting up IAMF decoder AOMediaCodec module"
         IAMF_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_iamf/src/main          
-        cd "${IAMF_MODULE_PATH}/jni" && git clone --depth=1 --revision=de364b983447a45d8be81f9172eea422c139dcf0 https://github.com/AOMediaCodec/iamf-tools.git iamf_tools
+        pushd "${IAMF_MODULE_PATH}/jni" 
+        git clone --depth=1 --revision=de364b983447a45d8be81f9172eea422c139dcf0 https://github.com/AOMediaCodec/iamf-tools.git iamf_tools
         ./build_iamf_tools.sh ${IAMF_MODULE_PATH}
         popd
         pushd $PROJECT_NAME
-
-        echo "*** Setting up FFMPEG ***"
-        export FFMPEG_MODULE_PATH=$MEDIA3_ROOT/libraries/decoder_ffmpeg/src/main
-        export ANDROID_ABI=21
-        export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb amrwb aac ac3 eac3 dca mlp truehd)
-        pushd $FFMPEG_MODULE_PATH/jni
-        git clone -b "$FFMPEG_BRANCH" https://github.com/FongMi/FFmpeg.git ffmpeg
-        rm -rf /usr/local/bin/cmake
-        ./build_ffmpeg.sh "${FFMPEG_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}" "${ANDROID_ABI}" "${ENABLED_DECODERS[@]}"
-        popd
-        pushd $PROJECT_NAME
-       
 
     - name: Build Media3 AARs
       run: |
