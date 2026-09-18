@@ -31,11 +31,9 @@ jobs:
           build-scan-terms-of-use-agree: "yes"
      
     - uses: nttld/setup-ndk@v1
-      id: setup-ndk
+      id: ndk
       with:
           ndk-version: r29
-          local-cache: false
-          add-to-path: true
 
     - uses: bazel-contrib/setup-bazel@0.19.0
       with:
@@ -43,15 +41,13 @@ jobs:
           disk-cache: ${{ github.workflow }}
           repository-cache: true
 
-    - uses: ilammy/setup-nasm@v1
-    - name: Install Meson
-      run: pip3 install --user meson
+    - run: sudo apt-get update && sudo apt-get install -y ninja-build meson nasm
 
     - name: Build ffmpeg
       continue-on-error: false
       env:
-          ANDROID_NDK_HOME: ${{steps.setup-ndk.outputs.ndk-path }}
-          NDK_PATH: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{steps.ndk.outputs.ndk-path }}
+          NDK_PATH: ${{ steps.ndk.outputs.ndk-path }}
           ROOT_DIR: ${{ github.workspace }}
       run: |       
         echo "*** Setting up Media3 ***"
