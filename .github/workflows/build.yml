@@ -120,7 +120,7 @@ jobs:
           echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
           echo 'org.gradle.caching=true' >> gradle.properties
           echo 'org.gradle.parallel=true' >> gradle.properties
-          ./gradlew bundleReleaseAar
+          ./gradlew bundleReleaseAar --no-daemon --stacktrace 2>&1 | tee gradle-build.log
           
           #./gradlew :lib-decoder-{ffmpeg,av1,flac,iamf,mpegh,opus,vp9}:bundleReleaseAar
           #./gradlew :lib-{common,exoplayer,extractor,ui,session,datasource,decoder,container}:bundleReleaseAar
@@ -176,8 +176,18 @@ jobs:
          git add jitpack.yml
          git commit -m "Update jitpack.yml"
          git push origin CI --force
+         
     - name: Push changes to CI branch
       run: |
         cd media3Libs
         git push -f origin CI
-      
+        
+    - name: Upload build logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v7
+      with:
+          name: build-logs
+          path: |
+            gradle-build.log
+            /tmp/build.log
+          retention-days: 3
