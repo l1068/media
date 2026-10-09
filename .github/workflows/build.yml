@@ -11,9 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     env:
-      PROJECT_USER: "l1068org"
+      PROJECT_USER: "mytv-android"
       PROJECT_NAME: "media"
-      MEDIA3_BRANCH: "r1.11.1-0.0.1"
+      MEDIA3_BRANCH: "media3-1.11.0"
       FFMPEG_BRANCH: "release-9.0-fongmi"
     
     steps:
